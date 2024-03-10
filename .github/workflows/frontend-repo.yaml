@@ -1,0 +1,26 @@
+name: Frontend Deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/**" # Assuming frontend files are under a 'frontend' directory
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout frontend repo
+        uses: actions/checkout@v2
+
+      - name: Build frontend
+        run: |
+          echo "Building frontend..." # Replace this with your build command
+          # Example: docker build -t frontend .
+
+      - name: Deploy frontend
+        run: |
+          # Example deployment command to your Ubuntu 22.04 server
+          ssh user@your-ubuntu-server 'docker pull frontend && docker run -d --name frontend-container -p 80:80 frontend:latest'

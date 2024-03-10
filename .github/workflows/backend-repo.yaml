@@ -1,0 +1,27 @@
+name: Backend Deployment
+
+on:
+  push:
+    branches:
+      - main
+  
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout backend repo
+        uses: actions/checkout@v2
+
+      - name: Deploy backend
+        run: |
+          ssh user@your-ubuntu-server 'cd /path/to/backend && git pull origin main && php artisan migrate'
+
+# To track CPU utilization and trigger email alerts accordingly.
+# We can use tools like Prometheus and Grafana for monitoring CPU usage and alertmanager to send email alerts.
+# Install Docker on both the frontend and backend servers.
+# Deploy monitoring agents (Prometheus) using Docker containers.
+# Set up alerting rules in the monitoring system.
+# Configure alert notification channels (email).
+# Monitor CPU utilization and receive alerts when it exceeds the threshold.
