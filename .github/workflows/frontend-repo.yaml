@@ -16,11 +16,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build frontend
-        run: |
-          echo "Building frontend..." # Replace this with your build command
-          # Example: docker build -t frontend .
+        run: docker build -t frontend .
 
       - name: Deploy frontend
-        run: |
-          # Example deployment command to your Ubuntu 22.04 server
-          ssh user@your-ubuntu-server 'docker pull frontend && docker run -d --name frontend-container -p 80:80 frontend:latest'
+        run: ssh ec2-user@35.254.165.25 'docker pull frontend && docker run -d --name frontend-container -p 80:80 frontend:latest'

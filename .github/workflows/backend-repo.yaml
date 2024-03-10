@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-  
 
 jobs:
   deploy-backend:
@@ -15,9 +14,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Deploy backend
-        run: |
-          ssh user@your-ubuntu-server 'cd /path/to/backend && git pull origin main && php artisan migrate'
-
+        run: ssh ec2-user@35.155.24.157 'cd /laravel && git pull origin main && php artisan migrate'
 # To track CPU utilization and trigger email alerts accordingly.
 # We can use tools like Prometheus and Grafana for monitoring CPU usage and alertmanager to send email alerts.
 # Install Docker on both the frontend and backend servers.
