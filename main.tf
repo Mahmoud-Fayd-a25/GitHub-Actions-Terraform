@@ -31,7 +31,7 @@ resource "aws_subnet" "public-1" {
 
 # Create a private subnet in a different Availability Zone
 resource "aws_subnet" "private-1" {
-  vpc_id = aws_vpc.main-1.id
+  vpc_id     = aws_vpc.main-1.id
   cidr_block = "10.0.2.0/24"
 
   # Don't enable auto-assign public IP addresses
@@ -109,12 +109,12 @@ resource "aws_instance" "backend" {
 
   # Provisioner to install Docker and Git
   provisioner "remote-exec" {
-  inline = [
-    "sudo apt update",
-    "sudo apt install -y docker.io git",
-    "sudo systemctl start docker",
-    "sudo systemctl enable docker",
-  ]
+    inline = [
+      "sudo apt update",
+      "sudo apt install -y docker.io git",
+      "sudo systemctl start docker",
+      "sudo systemctl enable docker",
+    ]
   }
 }
 
@@ -132,14 +132,14 @@ resource "aws_instance" "frontend" {
     volume_size = 8
   }
 
-    # Provisioner to install Docker and Git
+  # Provisioner to install Docker and Git
   provisioner "remote-exec" {
-  inline = [
-    "sudo apt update",
-    "sudo apt install -y docker.io git",
-    "sudo systemctl start docker",
-    "sudo systemctl enable docker",
-  ]
+    inline = [
+      "sudo apt update",
+      "sudo apt install -y docker.io git",
+      "sudo systemctl start docker",
+      "sudo systemctl enable docker",
+    ]
   }
 }
 
@@ -152,8 +152,8 @@ resource "aws_db_instance" "rds" {
   publicly_accessible    = false # No internet access
   vpc_security_group_ids = [aws_security_group.rds_sg-1.id]
   identifier             = "mydatabase"
-  username        = "mydbuser"      # username for accessing the MySQL database
-  password        = "mydbpassword"  
+  username               = "mydbuser" # username for accessing the MySQL database
+  password               = "mydbpassword"
   multi_az               = false
 
 
@@ -222,9 +222,7 @@ output "email_notification_arn" {
 }
 
 # Reference the output in another variable
-variable "email_notification_arn" {
-  default = var.email_notification_arn  # Reference the output
-}
+variable "email_notification_arn" {}
 
 # Output block to expose the public IP
 output "backend_public_ip" {
