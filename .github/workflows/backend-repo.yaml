@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout backend repo
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Get backend public IP from Terraform output
         run: |
