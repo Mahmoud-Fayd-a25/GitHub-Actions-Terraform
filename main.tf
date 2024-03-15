@@ -106,6 +106,7 @@ resource "aws_instance" "backend" {
     volume_type = "gp2"
     volume_size = 8
   }
+
   # Provisioner to install Docker and Git
   provisioner "remote-exec" {
   inline = [
@@ -218,4 +219,12 @@ resource "aws_sns_topic_subscription" "email_subscription" {
 # Variable for email notification ARN
 variable "email_notification_arn" {
   default = aws_sns_topic.email_notification.arn
+}
+
+# Output block to expose the public IP
+output "backend_public_ip" {
+  value = aws_instance.backend.public_ip
+}
+output "frontend_public_ip" {
+  value = aws_instance.frontend.public_ip
 }

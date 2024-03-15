@@ -15,8 +15,13 @@ jobs:
       - name: Checkout backend repo
         uses: actions/checkout@v4
 
+      - name: Get backend public IP from Terraform output
+        run: |
+          terraform output -json backend_public_ip | jq -r '.value' > backend_ip.txt
+          echo "BACKEND_PUBLIC_IP=$(cat backend_ip.txt)" >> $GITHUB_ENV
+
       - name: Deploy backend
-        run: ssh ec2-user@35.155.24.157 'cd /laravel && git pull origin main && php artisan migrate'
+        run: ssh ec2-user@${{ env.BACKEND_PUBLIC_IP }} 'cd /laravel && git pull origin main && php artisan migrate'
 
 # this command changes the directory to /laravel, pulls the latest changes from the main branch of the remote Git repository, 
 # and then executes any pending database migrations in the Laravel application. to update the application codebase and apply any necessary database schema changes.

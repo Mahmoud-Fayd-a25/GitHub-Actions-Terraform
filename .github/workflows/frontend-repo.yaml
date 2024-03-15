@@ -15,12 +15,16 @@ jobs:
       - name: Checkout frontend repo
         uses: actions/checkout@v4
 
+      - name: Get frontend public IP from Terraform output
+        run: |
+          terraform output -json frontend_public_ip | jq -r '.value' > frontend_ip.txt
+          echo "FRONTEND_PUBLIC_IP=$(cat frontend_ip.txt)" >> $GITHUB_ENV
+
       - name: Build frontend
         run: docker build -t frontend .
 
       - name: Deploy frontend
-        run: ssh ec2-user@35.254.165.25 'docker run -d --restart=always -p 3001:3001 -v uptime-kuma:/app/data --name uptime-kuma louislam/uptime-kuma:1 && cd uptime-kuma && git pull origin main && npm install && npm run build'
-
+        run: ssh ec2-user@${{ env.FRONTEND_PUBLIC_IP }} 'docker run -d --restart=always -p 3001:3001 -v uptime-kuma:/app/data --name uptime-kuma louislam/uptime-kuma:1 && cd uptime-kuma && git pull origin main && npm install && npm run build'
 # git pull origin main: fetches the latest changes from the main branch of the remote repository named origin
 # npm install: installs the dependencies specified in the package.json file
 # npm run build: executes the build script defined in the package.json file
