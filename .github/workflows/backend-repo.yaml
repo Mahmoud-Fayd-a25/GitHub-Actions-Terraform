@@ -3,7 +3,7 @@ name: Backend Deployment
 on:
   push:
     branches:
-      - 10.x
+      - main
     paths:
       - "laravel/**" # this workflow will only run when changes are made to the laravel directory
 
@@ -17,10 +17,10 @@ jobs:
 
       - name: Deploy backend
         run: ssh ec2-user@35.155.24.157 'cd /laravel && git pull origin main && php artisan migrate'
-# To track CPU utilization and trigger email alerts accordingly.
-# We can use tools like Prometheus and Grafana for monitoring CPU usage and alertmanager to send email alerts.
-# Install Docker on both the frontend and backend servers.
-# Deploy monitoring agents (Prometheus) using Docker containers.
-# Set up alerting rules in the monitoring system.
-# Configure alert notification channels (email).
-# Monitor CPU utilization and receive alerts when it exceeds the threshold.
+
+# this command changes the directory to /laravel, pulls the latest changes from the main branch of the remote Git repository, 
+# and then executes any pending database migrations in the Laravel application. to update the application codebase and apply any necessary database schema changes.
+# git pull origin main: Pulls the latest changes from the remote repository named origin into the local repository's main branch.
+# php artisan migrate: Executes the Laravel Artisan command migrate. This command runs any outstanding database migrations defined in your Laravel application.
+# Database migrations are used to modify the structure of the database schema, such as creating or altering database tables.
+

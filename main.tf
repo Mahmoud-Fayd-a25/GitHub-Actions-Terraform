@@ -106,6 +106,15 @@ resource "aws_instance" "backend" {
     volume_type = "gp2"
     volume_size = 8
   }
+  # Provisioner to install Docker and Git
+  provisioner "remote-exec" {
+  inline = [
+    "sudo apt update",
+    "sudo apt install -y docker.io git",
+    "sudo systemctl start docker",
+    "sudo systemctl enable docker",
+  ]
+  }
 }
 
 # Create a frontend machine with a public IP
@@ -120,6 +129,16 @@ resource "aws_instance" "frontend" {
   root_block_device {
     volume_type = "gp2"
     volume_size = 8
+  }
+
+    # Provisioner to install Docker and Git
+  provisioner "remote-exec" {
+  inline = [
+    "sudo apt update",
+    "sudo apt install -y docker.io git",
+    "sudo systemctl start docker",
+    "sudo systemctl enable docker",
+  ]
   }
 }
 
@@ -148,4 +167,55 @@ resource "aws_db_instance" "rds" {
 resource "aws_db_subnet_group" "my_rds_subnet_group" {
   name       = "mydb_subnet_group"
   subnet_ids = [aws_subnet.public-1.id, aws_subnet.private-1.id]
+}
+
+# CloudWatch metric alarm for CPU utilization on backend instance
+resource "aws_cloudwatch_metric_alarm" "backend_cpu_alarm" {
+  alarm_name          = "backend-cpu-utilization"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 1
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = 300 # 5 minutes
+  statistic           = "Average"
+  threshold           = 50
+  alarm_description   = "Alarm when CPU utilization exceeds 50% on backend instance"
+  alarm_actions       = [var.email_notification_arn] # ARN of SNS topic for email notification
+  dimensions = {
+    InstanceId = aws_instance.backend.id
+  }
+}
+
+# CloudWatch metric alarm for CPU utilization on frontend instance
+resource "aws_cloudwatch_metric_alarm" "frontend_cpu_alarm" {
+  alarm_name          = "frontend-cpu-utilization"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 1
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = 300 # 5 minutes
+  statistic           = "Average"
+  threshold           = 50
+  alarm_description   = "Alarm when CPU utilization exceeds 50% on frontend instance"
+  alarm_actions       = [var.email_notification_arn] # ARN of SNS topic for email notification
+  dimensions = {
+    InstanceId = aws_instance.frontend.id
+  }
+}
+
+# Email notification SNS topic
+resource "aws_sns_topic" "email_notification" {
+  name = "cpu-utilization-alerts"
+}
+
+# Email subscription for notification
+resource "aws_sns_topic_subscription" "email_subscription" {
+  topic_arn = aws_sns_topic.email_notification.arn
+  protocol  = "email"
+  endpoint  = "mahmoud.mody1.mm12@gmail.com" # Replace with your email address
+}
+
+# Variable for email notification ARN
+variable "email_notification_arn" {
+  default = aws_sns_topic.email_notification.arn
 }
