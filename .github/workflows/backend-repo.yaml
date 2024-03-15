@@ -3,7 +3,9 @@ name: Backend Deployment
 on:
   push:
     branches:
-      - main
+      - 10.x
+    paths:
+      - "laravel/**" # this workflow will only run when changes are made to the laravel directory
 
 jobs:
   deploy-backend:

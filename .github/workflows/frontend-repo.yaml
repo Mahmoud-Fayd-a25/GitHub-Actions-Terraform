@@ -3,9 +3,9 @@ name: Frontend Deployment
 on:
   push:
     branches:
-      - main
+      - master
     paths:
-      - "frontend/**" # Assuming frontend files are under a 'frontend' directory
+      - "uptime-kuma/**"
 
 jobs:
   build-and-deploy:
@@ -19,7 +19,7 @@ jobs:
         run: docker build -t frontend .
 
       - name: Deploy frontend
-        run: ssh ec2-user@35.254.165.25 'docker pull frontend && docker run -d --name frontend-container -p 80:80 frontend:latest'
+        run: ssh ec2-user@35.254.165.25 'docker run -d --restart=always -p 3001:3001 -v uptime-kuma:/app/data --name uptime-kuma louislam/uptime-kuma:1'
         # run: ssh ec2-user@35.254.165.25 'cd /louislam/uptime-kuma && git pull origin main && npm install && npm run build'
         # git pull origin main: fetches the latest changes from the main branch of the remote repository named origin
         # npm install: installs the dependencies specified in the package.json file
