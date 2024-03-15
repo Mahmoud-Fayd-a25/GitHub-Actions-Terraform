@@ -216,9 +216,14 @@ resource "aws_sns_topic_subscription" "email_subscription" {
   endpoint  = "mahmoud.mody1.mm12@gmail.com" # Replace with your email address
 }
 
-# Variable for email notification ARN
+# Output the ARN
+output "email_notification_arn" {
+  value = aws_sns_topic.email_notification.arn
+}
+
+# Reference the output in another variable
 variable "email_notification_arn" {
-  default = aws_sns_topic.email_notification.arn
+  default = var.email_notification_arn  # Reference the output
 }
 
 # Output block to expose the public IP
@@ -228,3 +233,5 @@ output "backend_public_ip" {
 output "frontend_public_ip" {
   value = aws_instance.frontend.public_ip
 }
+
+
