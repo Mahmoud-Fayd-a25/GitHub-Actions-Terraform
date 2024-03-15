@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout backend repo
-        uses: actions/@v4
+        uses: actions/checkout@v4
 
       - name: Deploy backend
         run: ssh ec2-user@35.155.24.157 'cd /laravel && git pull origin main && php artisan migrate'

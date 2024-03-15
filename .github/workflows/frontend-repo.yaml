@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout frontend repo
-        uses: actions/@v4
+        uses: actions/checkout@v4
 
       - name: Build frontend
         run: docker build -t frontend .
