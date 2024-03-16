@@ -8,25 +8,68 @@ on:
       - "uptime-kuma/**"
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout frontend repo
+        uses: actions/checkout@v4
+
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Get frontend public IP from Terraform output
+        run: |
+          sudo terraform output -json frontend_public_ip | jq -r '.value' > frontend_ip.txt
+          sudo echo "FRONTEND_PUBLIC_IP=$(cat frontend_ip.txt)" >> $GITHUB_ENV
+
+      - name: SSH into EC2 instance
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.FRONTEND_PUBLIC_IP }}
+          username: ec2-user
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.EC2_PORT }}
+
+      - name: Login to Docker Hub # replace with your credentials
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and tag image
+        run: |
+          sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/uptime-kuma:latest .
+          sudo docker tag ${{ secrets.DOCKERHUB_USERNAME }}/uptime-kuma:latest ${{ secrets.DOCKERHUB_USERNAME }}/uptime-kuma:${{ github.sha }}
+
+      - name: Push image to Docker Hub
+        run: sudo docker push ${{ secrets.DOCKERHUB_USERNAME }}/uptime-kuma:latest ${{ secrets.DOCKERHUB_USERNAME }}/uptime-kuma:${{ github.sha }}
+
+  deploy-to-server:  # Separate job for deployment
+    runs-on: ubuntu-latest
+    needs: build-and-push  # Wait for build-and-push job to complete
 
     steps:
       - name: Checkout frontend repo
         uses: actions/checkout@v4
 
-      - name: Get frontend public IP from Terraform output
-        run: |
-          terraform output -json frontend_public_ip | jq -r '.value' > frontend_ip.txt
-          echo "FRONTEND_PUBLIC_IP=$(cat frontend_ip.txt)" >> $GITHUB_ENV
-
-      - name: Build frontend
-        run: docker build -t frontend .
-
-      - name: Deploy frontend
-        run: ssh ec2-user@${{ env.FRONTEND_PUBLIC_IP }} 'docker run -d --restart=always -p 3001:3001 -v uptime-kuma:/app/data --name uptime-kuma louislam/uptime-kuma:1 && cd uptime-kuma && git pull origin main && npm install && npm run build'
+      - name: SSH into EC2 instance and deploy 
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.FRONTEND_PUBLIC_IP }}
+          username: ec2-user
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.EC2_PORT }}
+          script: |
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/uptime-kuma:latest
+            sudo docker stop uptime-kuma
+            sudo docker rm uptime-kuma
+            sudo docker run -d --restart=always -p 3001:3001 -v uptime-kuma:/app/data --name uptime-kuma ${{ secrets.DOCKERHUB_USERNAME }}/uptime-kuma:latest
+            cd uptime-kuma && git pull origin main && npm install && npm run build
 
 
 # git pull origin main: fetches the latest changes from the main branch of the remote repository named origin
 # npm install: installs the dependencies specified in the package.json file
 # npm run build: executes the build script defined in the package.json file
+
