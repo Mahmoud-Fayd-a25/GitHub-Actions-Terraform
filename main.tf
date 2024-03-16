@@ -1,5 +1,8 @@
 provider "aws" {
   region = "eu-north-1"
+  assume_role {
+    role_arn = "arn:aws:iam::590184002739:user/Terraform-user"
+  }
 }
 
 # Define the CIDR block for the VPC
