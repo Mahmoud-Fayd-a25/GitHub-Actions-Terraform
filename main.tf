@@ -222,7 +222,9 @@ output "email_notification_arn" {
 }
 
 # Reference the output in another variable
-variable "email_notification_arn" {}
+variable "email_notification_arn" {
+  default = "arn:aws:sns:us-east-1:123456789012:cpu-utilization-alerts"
+}
 
 # Output block to expose the public IP
 output "backend_public_ip" {
