@@ -25,6 +25,8 @@ jobs:
 
       - name: Deploy frontend
         run: ssh ec2-user@${{ env.FRONTEND_PUBLIC_IP }} 'docker run -d --restart=always -p 3001:3001 -v uptime-kuma:/app/data --name uptime-kuma louislam/uptime-kuma:1 && cd uptime-kuma && git pull origin main && npm install && npm run build'
+
+
 # git pull origin main: fetches the latest changes from the main branch of the remote repository named origin
 # npm install: installs the dependencies specified in the package.json file
 # npm run build: executes the build script defined in the package.json file
