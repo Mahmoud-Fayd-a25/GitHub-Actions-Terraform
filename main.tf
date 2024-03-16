@@ -1,15 +1,6 @@
-# Configure Terraform workspace
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.0"
-    }
-  }
+provider "aws" {
+  region = "eu-north-1"
 }
-
-# Set the region for your resources
-data "aws_region" "current" {}
 
 # Define the CIDR block for the VPC
 variable "vpc_cidr_block" {
@@ -223,7 +214,7 @@ output "email_notification_arn" {
 
 # Reference the output in another variable
 variable "email_notification_arn" {
-  default = "arn:aws:sns:us-east-1:123456789012:cpu-utilization-alerts"
+  default = "arn:aws:sns:eu-north-1:123456789012:cpu-utilization-alerts"
 }
 
 # Output block to expose the public IP
